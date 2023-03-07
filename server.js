@@ -1,50 +1,16 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const util = require('util')
-const notes = require('./db/db.json');
-
-const uuid = require('./lib/uuid');
-
-const PORT = process.env.PORT  || 3001;
-
 const app = express();
+const api = require('./routes/routes');
+const path = require('path');
+const html = require('./routes/html')
 
-//ask express to create route for every file in the public folder and give it a route
-//sets up express app to handle data parser
+const PORT = process.env.PORT || 3001;
+
+app.use(express.static('public'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static('public'));
-
-app.get('/notes',(req, res) => 
-    res.sendFile(path.join(__dirname, '/public/notes.html'))
-);
-
-const readFromFile = util.promisify(fs.readFile);
-
-const writeToFile = (destination, content) =>
-fs.writeFile(destination, JSON.stringify(content, null, 4), (err) =>
-    err ? console.error(err) : console.info(`\nData written to ${destination}`)
-);
-
-const readAndAppend = (content, file) => {
-    console.log (content, file);
-    fs.readFile(file, 'utf8', (err, data) => {
-        if(err) {
-            console.error(err);
-        } else {
-            const parsedData = JSON.parse(data);
-            parsedData.push(content);
-            writeToFile(file, parsedData);
-        }
-    });
-};
-
-//route to get the tips 
-app.get('/api/notes')
-
-app.listen(PORT, () => {
-    console.log(`App listening at http://localhost:${PORT}.`);
-});
+app.use('/api', api);
+app.use('/', html);
+app.listen(PORT, () => console.log(`Listening on ${PORT}`));
