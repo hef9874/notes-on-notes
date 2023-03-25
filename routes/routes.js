@@ -14,17 +14,32 @@ router.post('/notes', (req, res) => {
     res.json({success: true})
 })
 
+// router.delete('/notes/:id', (req, res) => {
+//     readFromFile('db/db.json', 'utf8').then(notes => {
+//         const data = JSON.parse(notes).filter(note => note.id !== req.params.id)
+//         console.log(data)
+//         return data
+//     }).then(notes => {
+//         console.log(notes)
+//        writeToFile('db/db.json', JSON.stringify(notes))
+//        res.json({success: true})
+//     })
+//    .catch(err => console.log(err))
+// })
+
 router.delete('/notes/:id', (req, res) => {
-    readFromFile('db/db.json', 'utf8').then(notes => {
-        const data = JSON.parse(notes).filter(note => note.id !== req.params.id)
-        console.log(data)
-        return data
-    }).then(notes => {
-        console.log(notes)
-       writeToFile('db/db.json', JSON.stringify(notes))
-       res.json({success: true})
-    })
-    .catch(err => console.log(err))
-})
+    const idToDelete = req.params.id;
+    readFromFile('db/db.json', 'utf8')
+      .then(data => {
+        const parsedData = JSON.parse(data);
+        const filteredData = parsedData.filter(note => note.id !== idToDelete);
+        writeToFile('db/db.json', filteredData);
+        res.json({ success: true });
+      })
+      .catch(err => {
+        console.error(err);
+        res.status(500).json({ error: 'Could not delete note' });
+      });
+  });
 
 module.exports = router;

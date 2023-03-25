@@ -19,12 +19,24 @@ const writeToFile = (destination, content) =>
  *  @param {string} file The path to the file you want to save to.
  *  @returns {void} Nothing
  */
+
+
 const readAndAppend = (content, file) => {
   fs.readFile(file, 'utf8', (err, data) => {
     if (err) {
       console.error(err);
     } else {
-      const parsedData = JSON.parse(data);
+      let parsedData;
+      try {
+        parsedData = JSON.parse(data);
+      } catch (err) {
+        console.error(`Error parsing JSON data in file ${file}:`, err);
+        parsedData = [];
+      }
+      if (!Array.isArray(parsedData)) {
+        console.error(`Invalid JSON data in file ${file}: expected an array, got ${typeof parsedData}`);
+        parsedData = [];
+      }
       parsedData.push(content);
       writeToFile(file, parsedData);
     }
